@@ -37,10 +37,10 @@ This project bridges the gap between **Computer Vision** and **Digital Audio Wor
 ### Installation
 1. Clone the repo:
    ```sh
-   git clone [https://github.com/RujulaAD/Chorded.git](https://github.com/RujulaAD/Chorded.git)
+   git clone https://github.com/RujulaAD/Chorded.git
 2. Install dependencies:
    ```sh
    pip install -r requirements.txt
 4. Run the application:
    ```sh
-   python main.py
+   python hand_to_chord.py
