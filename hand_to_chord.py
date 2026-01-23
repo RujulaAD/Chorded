@@ -22,6 +22,7 @@ midi_out.set_instrument(vari_instrument, 1)   # Channel 1: chosen instrument
 
 # Chord mapping
 root_notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
+# TODO: Refactor to generate chords algorithmically based on music theory intervals rather than hardcoding. This will reduce memory usage and support all keys dynamically.
 guitar_chords = {
     ('C', 'major'):     [48, 52, 55, 60, 64],      # C3, E3, G3, C4, E4
     ('C', 'minor'):     [63, 67, 72],         # Eb G C (1st inversion)
@@ -126,6 +127,7 @@ piano_chords = {
 
 
 # Camera
+# TODO: Implement an abstract VideoSource class to support external cameras or pre-recorded video files for testing pipelines.
 cap = cv2.VideoCapture(0)
 
 # Track chord state
@@ -148,6 +150,7 @@ def get_fingers_up(hand_landmarks):
 cv2.namedWindow("Chord Guide", cv2.WINDOW_NORMAL)
 guide = cv2.imread("Gesture_to_Chords.png")
 
+# TODO: Encapsulate state (current_chord, last_played) into a 'ChordEngine' class to improve modularity and testability.
 while True:
     cv2.imshow("Chord Guide", guide)
 
@@ -214,6 +217,7 @@ while True:
                             for i, note in enumerate(chord_notes):
                                 midi_out.note_on(note, 100, 1)
                                 midi_out.note_on(note, 50, 0)
+                                # TODO: Move this to a separate thread to prevent video lag
                                 time.sleep(0.05)  # 50 milliseconds between notes
 
 
