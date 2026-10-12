@@ -1,46 +1,31 @@
 # Chorded
-**A Computer Vision-Based Virtual Instrument**
 
-> **Mission:** To make music creation accessible to individuals without access to physical instruments or financial resources by turning simple hand gestures into rich musical compositions.
+Chorded is a Python webcam instrument. MediaPipe detects hand gestures, and the app plays MIDI chords through a Tkinter interface with the camera preview and song chord map in one window.
 
----
+## Requirements
 
-## About The Project
-Chorded is a gesture-recognition system that detects real-time hand positions and maps finger patterns to musical chords. By leveraging computer vision, it allows users to play instruments virtually, lowering the barrier to entry for musical expression.
+- Python 3.11 is recommended; it is the version used to run this project.
+- A webcam.
+- A MIDI output device available to Pygame. The app currently opens MIDI output device `0`.
 
-This project bridges the gap between **Computer Vision** and **Digital Audio Workstations (DAW)** logic, creating a seamless "air-instrument" experience.
+## Install and Run
 
-## Tech Stack
-* **Language:** Python
-* **Computer Vision:** OpenCV, MediaPipe
-* **Backend:** Flask
-* **Audio Protocol:** MIDI (Dynamic Channel Parsing)
+In Windows PowerShell, create the virtual environment outside the OneDrive project folder to avoid syncing generated dependency and bytecode files:
 
-## Key Features
-* **Real-Time Gesture Tracking:** Utilizes MediaPipe to detect hand landmarks with high precision and low latency.
-* **Smart Chord Mapping:** Recognizes finger patterns to trigger complex chords and dynamic inversions automatically.
-* **Multi-Instrument Backend:** A Flask-based architecture that supports dynamic MIDI channel parsing, allowing the user to switch between different instrument outputs.
-* **Accessibility First:** Designed specifically for users with limited physical mobility or lack of access to hardware instruments.
+```powershell
+py -3.11 -m venv "$env:USERPROFILE\venvs\chorded"
+& "$env:USERPROFILE\venvs\chorded\Scripts\python.exe" -m pip install -r requirements.txt
+& "$env:USERPROFILE\venvs\chorded\Scripts\python.exe" hand_to_chord.py
+```
 
-## How It Works
-1.  **Input:** The webcam captures video input.
-2.  **Processing:** OpenCV and MediaPipe process the frame to identify hand landmarks and calculate finger states.
-3.  **Logic:** The Python backend interprets these states as musical chords (e.g., "Peace sign" = C Major).
-4.  **Output:** The system generates MIDI signals sent to the system's audio output or connected DAW.
+## Choose Chords and Gestures
 
-## Getting Started
+1. Enter the song's chord names separated by commas, for example: `C, Am, F#sus4, Bb7`.
+2. Select **Load chords**. The app creates and activates a default gesture for each chord.
+3. To customize the gestures, choose a different finger-count pair for each chord and select **Apply gesture map**.
 
-### Prerequisites
-* Python 3.8+
-* Webcam
+Each pair is the number of extended fingers on the two hands; either hand can show either count. Hold a mapped pair briefly to play its chord. Unmapped pairs do nothing. Releasing the hands or showing two closed fists stops playback. The map supports up to 15 unique chords per session.
 
-### Installation
-1. Clone the repo:
-   ```sh
-   git clone https://github.com/RujulaAD/Chorded.git
-2. Install dependencies:
-   ```sh
-   pip install -r requirements.txt
-4. Run the application:
-   ```sh
-   python hand_to_chord.py
+Common chord suffixes include `m`, `dim`, `7`, `m7`, `maj7`, `aug`, `sus2`, `sus4`, `6`, `m6`, `add9`, `9`, `m9`, `maj9`, `dim7`, and `m7b5`. Sharp and flat roots are supported, such as `F#` and `Bb`.
+
+The chord map scrolls with the mouse wheel when it is longer than the panel. Press `Esc` or close the window to exit.
