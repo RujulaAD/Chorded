@@ -212,6 +212,7 @@ midi_out.set_instrument(vari_instrument, 1)   # Channel 1: chosen instrument
 # Chord mapping
 root_notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
 # Each shape lists frets from low E to high E; -1 means mute the string.
+# TODO: Derive additional playable voicings from interval definitions to extend chord and key support.
 GUITAR_OPEN_STRINGS = [40, 45, 50, 55, 59, 64]
 GUITAR_FRET_SHAPES = {
     ('C', 'major'): (-1, 3, 2, 0, 1, 0),
@@ -337,6 +338,7 @@ piano_chords = {
 
 # Camera and combined chord-mapping interface
 instrument_chords = guitar_chords if vari_instrument == 24 else piano_chords
+# TODO: Abstract the video source to support prerecorded input in tests.
 cap = cv2.VideoCapture(0)
 last_chord_notes = []
 last_played_chord = None
@@ -388,6 +390,7 @@ root.title('Air Chord')
 root.geometry('1240x760')
 root.minsize(1160, 640)
 root.configure(bg=background_color)
+# TODO: Encapsulate gesture and chord playback state for easier testing.
 
 style = ttk.Style(root)
 style.theme_use('clam')
