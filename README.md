@@ -1,6 +1,6 @@
 # Chorded
 
-Chorded is a Python webcam instrument. MediaPipe detects hand gestures, and the app plays MIDI chords through a Tkinter interface with the camera preview and song chord map in one window.
+Chorded is a Python webcam instrument. MediaPipe detects hand gestures, and the app plays MIDI chords through a Tkinter interface with the camera preview and song chord map in one window. This makes music creation accessible to individuals without access to physical instruments or financial resources by turning simple hand gestures into rich musical chords.
 
 ## Requirements
 
