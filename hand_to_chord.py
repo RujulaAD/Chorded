@@ -1,6 +1,7 @@
 import cv2
 import base64
 import itertools
+import math
 import mediapipe as mp
 import pygame.midi
 import re
@@ -352,14 +353,31 @@ text_color = '#A3006F'
 
 
 def get_fingers_up(hand_landmarks):
-    finger_tips = [4, 8, 12, 16, 20]
-    finger_names = ['thumb', 'index', 'middle', 'ring', 'pinky']
+    wrist = hand_landmarks.landmark[0]
     fingers_up = []
 
-    if hand_landmarks.landmark[4].x > hand_landmarks.landmark[3].x:
+    thumb_tip = hand_landmarks.landmark[4]
+    thumb_ip = hand_landmarks.landmark[3]
+    thumb_mcp = hand_landmarks.landmark[2]
+    pinky_mcp = hand_landmarks.landmark[17]
+    if thumb_mcp.x < pinky_mcp.x:
+        if thumb_tip.x < thumb_ip.x:
+            fingers_up.append('thumb')
+    elif thumb_tip.x > thumb_ip.x:
         fingers_up.append('thumb')
-    for tip, name in zip(finger_tips[1:], finger_names[1:]):
-        if hand_landmarks.landmark[tip].y < hand_landmarks.landmark[tip - 2].y:
+
+    finger_joints = [
+        (8, 6, 'index'),
+        (12, 10, 'middle'),
+        (16, 14, 'ring'),
+        (20, 18, 'pinky'),
+    ]
+    for tip_index, pip_index, name in finger_joints:
+        tip = hand_landmarks.landmark[tip_index]
+        pip = hand_landmarks.landmark[pip_index]
+        tip_distance = math.hypot(tip.x - wrist.x, tip.y - wrist.y)
+        pip_distance = math.hypot(pip.x - wrist.x, pip.y - wrist.y)
+        if tip_distance > pip_distance:
             fingers_up.append(name)
 
     return fingers_up
