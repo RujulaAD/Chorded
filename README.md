@@ -26,6 +26,6 @@ py -3.11 -m venv "$env:USERPROFILE\venvs\chorded"
 
 Each pair is the number of extended fingers on the two hands; either hand can show either count. Hold a mapped pair briefly to play its chord. Unmapped pairs do nothing. Releasing the hands or showing two closed fists stops playback. The map supports up to 15 unique chords per session.
 
-Common chord suffixes include `m`, `dim`, `7`, `m7`, `maj7`, `aug`, `sus2`, `sus4`, `6`, `m6`, `add9`, `9`, `m9`, `maj9`, `dim7`, and `m7b5`. Sharp and flat roots are supported, such as `F#` and `Bb`.
+Common chord suffixes include `m`, `dim`, `7`, `m7`, `maj7`, `aug`, `sus2`, `sus4`, `6`, `m6`, `add9`, `9`, `m9`, `maj9`, `dim7`, and `m7b5`. Sharp and flat roots are supported, such as `F#` and `Bb`. Slash chords such as `C#/F#` are supported; the note after `/` is played as the lowest bass note.
 
 The chord map scrolls with the mouse wheel when it is longer than the panel. Press `Esc` or close the window to exit.

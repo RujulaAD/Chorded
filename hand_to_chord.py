@@ -74,11 +74,12 @@ gesture_hold_threshold = 0.2  # seconds
 pending_chord = None
 
 def parse_chord_symbol(symbol):
-    match = re.fullmatch(r'([A-Ga-g])([#b]?)(.*)', symbol.strip())
+    symbol = symbol.strip().replace(' ', '')
+    match = re.fullmatch(r'([A-Ga-g])([#b]?)([^/]*)(?:/([A-Ga-g])([#b]?))?', symbol)
     if not match:
         raise ValueError(f"Invalid chord name: {symbol}")
 
-    letter, accidental, suffix = match.groups()
+    letter, accidental, suffix, bass_letter, bass_accidental = match.groups()
     root_name = letter.upper()
     root_pitch = ROOT_PITCH_CLASSES[root_name]
     if accidental == '#':
@@ -97,24 +98,39 @@ def parse_chord_symbol(symbol):
             raise ValueError(f"Unsupported chord quality in {symbol!r}; use {supported}.")
         quality, quality_suffix = quality_data
 
-    return (root_pitch, quality), f'{root_name}{accidental}{quality_suffix}'
+    bass_pitch = None
+    bass_label = ''
+    if bass_letter:
+        bass_name = bass_letter.upper()
+        bass_pitch = ROOT_PITCH_CLASSES[bass_name]
+        if bass_accidental == '#':
+            bass_pitch += 1
+        elif bass_accidental == 'b':
+            bass_pitch -= 1
+        bass_pitch %= 12
+        bass_label = f'/{bass_name}{bass_accidental}'
+
+    return (root_pitch, quality, bass_pitch), f'{root_name}{accidental}{quality_suffix}{bass_label}'
 
 
-def find_playable_guitar_voicing(root_pitch, quality):
+def find_playable_guitar_voicing(root_pitch, quality, bass_pitch=None):
     target_pitches = {(root_pitch + interval) % 12 for interval in CHORD_INTERVALS[quality]}
+    if bass_pitch is None:
+        bass_pitch = root_pitch
+    required_pitches = target_pitches | {bass_pitch}
 
     for max_fret in range(13):
         string_frets = [
-            [-1] + [fret for fret in range(max_fret + 1) if (open_note + fret) % 12 in target_pitches]
+            [-1] + [fret for fret in range(max_fret + 1) if (open_note + fret) % 12 in required_pitches]
             for open_note in GUITAR_OPEN_STRINGS
         ]
         best_shape = None
         for frets in itertools.product(*string_frets):
             notes = [open_note + fret for open_note, fret in zip(GUITAR_OPEN_STRINGS, frets) if fret >= 0]
-            if len(notes) < len(target_pitches) or len(set(notes)) != len(notes):
+            if len(notes) < len(required_pitches) or len(set(notes)) != len(notes):
                 continue
             pitches = {note % 12 for note in notes}
-            if pitches != target_pitches or min(notes) % 12 != root_pitch or notes != sorted(notes):
+            if pitches != required_pitches or min(notes) % 12 != bass_pitch or notes != sorted(notes):
                 continue
 
             held_frets = [fret for fret in frets if fret > 0]
@@ -132,23 +148,31 @@ def find_playable_guitar_voicing(root_pitch, quality):
 
 
 def get_chord_notes(chord_identity, chord_table):
-    target_pitch, quality = chord_identity
+    target_pitch, quality, bass_pitch = chord_identity
     anchor_root, anchor_pitch = min(
         ROOT_PITCH_CLASSES.items(),
         key=lambda item: abs((target_pitch - item[1] + 6) % 12 - 6),
     )
     shift = (target_pitch - anchor_pitch + 6) % 12 - 6
-    if (anchor_root, quality) in chord_table:
-        return [note + shift for note in chord_table[(anchor_root, quality)]]
     if chord_table is guitar_chords:
-        return find_playable_guitar_voicing(target_pitch, quality)
+        if bass_pitch is None and (anchor_root, quality) in chord_table:
+            return [note + shift for note in chord_table[(anchor_root, quality)]]
+        return find_playable_guitar_voicing(target_pitch, quality, bass_pitch)
 
-    anchor_root_note = min(
-        note for note in chord_table[(anchor_root, 'major')]
-        if note % 12 == anchor_pitch
-    )
-    root_note = anchor_root_note + shift
-    return [root_note + interval for interval in CHORD_INTERVALS[quality]]
+    if (anchor_root, quality) in chord_table:
+        notes = [note + shift for note in chord_table[(anchor_root, quality)]]
+    else:
+        anchor_root_note = min(
+            note for note in chord_table[(anchor_root, 'major')]
+            if note % 12 == anchor_pitch
+        )
+        root_note = anchor_root_note + shift
+        notes = [root_note + interval for interval in CHORD_INTERVALS[quality]]
+
+    if bass_pitch is not None:
+        bass_note = bass_pitch + 12 * ((min(notes) - 1 - bass_pitch) // 12)
+        notes.insert(0, bass_note)
+    return notes
 
 
 def parse_song_chords(entered):
