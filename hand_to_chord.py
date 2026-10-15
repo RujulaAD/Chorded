@@ -410,7 +410,7 @@ def get_fingers_up(hand_landmarks):
 
 
 root = tk.Tk()
-root.title('Air Chord')
+root.title('Chorded')
 root.geometry('1240x760')
 root.minsize(1160, 640)
 root.configure(bg=background_color)
@@ -428,7 +428,7 @@ style.configure(
 
 header = tk.Label(
     root,
-    text='AIR CHORD',
+    text='CHORDED',
     bg=background_color,
     fg=text_color,
     font=('Segoe UI', 18, 'bold'),
