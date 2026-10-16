@@ -70,7 +70,7 @@ CHORD_INTERVALS = {
 }
 
 gesture_start_time = 0
-gesture_hold_threshold = 0.2  # seconds
+gesture_hold_threshold = 0.1  # seconds
 pending_chord = None
 
 def parse_chord_symbol(symbol):
