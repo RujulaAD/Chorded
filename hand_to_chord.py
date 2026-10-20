@@ -8,6 +8,7 @@ import re
 import tkinter as tk
 import time
 from tkinter import ttk
+from PIL import Image, ImageTk
 
 # Debounce setup
 
@@ -70,7 +71,7 @@ CHORD_INTERVALS = {
 }
 
 gesture_start_time = 0
-gesture_hold_threshold = 0.1  # seconds
+gesture_hold_threshold = 0.05  # seconds
 pending_chord = None
 
 def parse_chord_symbol(symbol):
@@ -364,6 +365,7 @@ piano_chords = {
 instrument_chords = guitar_chords if vari_instrument == 24 else piano_chords
 # TODO: Abstract the video source to support prerecorded input in tests.
 cap = cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 last_chord_notes = []
 last_played_chord = None
 song_gestures = {}
@@ -588,6 +590,11 @@ def stop_current_chord():
     for note in last_chord_notes:
         midi_out.note_off(note, 1)
         midi_out.note_off(note, 0)
+    
+    # Clear the text if a chord was just playing
+    if last_played_chord is not None:
+        status_label.configure(text='')
+        
     last_chord_notes = []
     last_played_chord = None
     pending_chord = None
@@ -626,6 +633,7 @@ apply_button.configure(command=apply_gesture_map)
 def update_camera():
     global gesture_start_time, pending_chord, last_chord_notes, last_played_chord
     ret, frame = cap.read()
+    frame = cv2.resize(frame, (640, 480))
     if not ret:
         camera_label.configure(text='Camera unavailable. Check that it is connected.', image='')
         root.after(250, update_camera)
@@ -671,14 +679,21 @@ def update_camera():
     else:
         stop_current_chord()
 
-    success, encoded_frame = cv2.imencode('.png', frame)
-    if success:
-        image_data = base64.b64encode(encoded_frame).decode('ascii')
-        camera_image = tk.PhotoImage(data=image_data)
-        camera_label.configure(image=camera_image, text='')
-        camera_label.image = camera_image
+    # success, encoded_frame = cv2.imencode('.png', frame)
+    # if success:
+    #     image_data = base64.b64encode(encoded_frame).decode('ascii')
+    #     camera_image = tk.PhotoImage(data=image_data)
+    #     camera_label.configure(image=camera_image, text='')
+    #     camera_label.image = camera_image
 
-    root.after(15, update_camera)
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    pil_img = Image.fromarray(rgb_frame)
+    camera_image = ImageTk.PhotoImage(image=pil_img)
+    
+    camera_label.configure(image=camera_image, text='')
+    camera_label.image = camera_image
+
+    root.after(30, update_camera)
 
 
 def close_app():
